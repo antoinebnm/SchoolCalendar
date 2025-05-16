@@ -19,7 +19,7 @@ CREATE TABLE Notification (
 
 CREATE TABLE Cours (
                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       nom TEXT NOT NULL,
+                       matiere TEXT NOT NULL,
                        id_enseignant INTEGER NOT NULL,
                        id_salle INTEGER NOT NULL,
                        date_debut DATETIME NOT NULL,

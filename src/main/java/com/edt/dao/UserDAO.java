@@ -1,11 +1,12 @@
 package com.edt.dao;
 
 import com.edt.model.User;
+import com.edt.utils.DatabaseManager;
 
 import java.sql.*;
 
 public class UserDAO {
-    private Connection conn;
+    private static Connection conn;
 
     public UserDAO(Connection conn) {
         this.conn = conn;
@@ -47,5 +48,23 @@ public class UserDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static String findSomethingById(int id, String something) {
+        String type = null;
+        String query = "SELECT"+something+" type FROM utilisateur WHERE id = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            // Définir le paramètre id
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    type = rs.getString("type");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return type;
     }
 }
