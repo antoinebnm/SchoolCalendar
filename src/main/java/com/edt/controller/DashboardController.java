@@ -5,17 +5,19 @@ import com.calendarfx.model.Entry;
 import com.calendarfx.view.CalendarView;
 import com.edt.dao.CoursDAO;
 import com.edt.model.Cours;
-import com.edt.model.Horaire;
 import com.edt.utils.DatabaseManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.stage.Modality;
 
 import java.net.URL;
 import java.sql.Connection;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
@@ -23,16 +25,61 @@ public class DashboardController implements Initializable {
     @FXML
     private CalendarView calendarView;
 
-    private Calendar coursCalendar = new Calendar("Cours");
+    private final Calendar coursCalendar = new Calendar("Cours");
 
-    private int userId = 1; // TODO: replace with real user session
+    private int userId;
+
+    private Object coursDetails = new Object() {
+        private Cours cours;
+    };
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+        loadEvents(userId);
+    }
+
+    private void initCalendarSettings() {
+        calendarView.showAddCalendarButtonProperty().set(false);
+        calendarView.showSourceTrayButtonProperty().set(false);
+        calendarView.showSearchFieldProperty().set(false);
+        calendarView.showPageToolBarControlsProperty().set(false);
+        calendarView.setEntryFactory(param -> null);
+        calendarView.setContextMenuCallback(param -> null);
+        calendarView.setEntryDetailsPopOverContentCallback(param -> {
+            Entry<?> entry = param.getEntry();
+
+            calendarView.clearSelection();
+
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                String[] details = entry.getUserObject().toString().split("<§>");
+
+                alert.setTitle(entry.getTitle());
+                alert.setHeaderText("Salle " + entry.getLocation());
+                alert.setHeaderText(alert.getHeaderText() + "\nEnseignant: " + details[0]);
+
+                alert.setContentText("Début : " + entry.getStartTime() +
+                        "\nFin : " + entry.getEndTime());
+
+                if (!details[1].equals("null")) alert.setContentText(alert.getContentText() + "\n\nDescription:\n" + details[1]);
+
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.initOwner(calendarView.getScene().getWindow());
+                alert.show();});
+
+            return null;
+        });
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        calendarView.getCalendarSources().get(0).getCalendars().add(coursCalendar);
-        calendarView.showWeekPage();
+        initCalendarSettings();
 
-        loadEvents(userId);
+        coursCalendar.setStyle(Calendar.Style.STYLE2);
+        coursCalendar.setReadOnly(true);
+
+        calendarView.getCalendarSources().getFirst().getCalendars().add(coursCalendar);
+        calendarView.showWeekPage();
     }
 
     private void loadEvents(int userId) {
@@ -41,15 +88,14 @@ public class DashboardController implements Initializable {
             List<Cours> coursList = coursDAO.getCoursByUserId(userId);
 
             for (Cours cours : coursList) {
-                Horaire horaire = cours.getHoraire();
-
                 Entry<String> entry = new Entry<>(cours.getMatiere());
 
                 entry.setTitle(cours.getMatiere());
-                entry.setLocation(cours.getSalle());
+                entry.setLocation("L012 (todo)"); //Salle.getSalleById(cours.getSalleId())
+                entry.setUserObject(cours.getEnseignantId()+"<§>"+cours.getDescription()); //Enseignant.getNomById(cours.getEnseignantId())
                 entry.changeStartDate(cours.getHoraire().getDateDebut().toLocalDate());
-                entry.changeStartDate(cours.getHoraire().getDateDebut().toLocalDate());
-                entry.changeEndTime(cours.getHoraire().getDateFin().toLocalTime());
+                entry.changeStartTime(cours.getHoraire().getDateDebut().toLocalTime());
+                entry.changeEndDate(cours.getHoraire().getDateFin().toLocalDate());
                 entry.changeEndTime(cours.getHoraire().getDateFin().toLocalTime());
 
                 coursCalendar.addEntry(entry);

@@ -4,13 +4,14 @@ import com.edt.dao.UserDAO;
 import com.edt.model.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 
 import javax.swing.*;
 
-import static com.edt.App.CalendarScene;
-import static com.edt.App.switchScene;
+import static com.edt.App.*;
 import static com.edt.utils.DatabaseManager.getConnection;
 
 public class AuthController {
@@ -37,26 +38,6 @@ public class AuthController {
     private CheckBox showPwd;
 
     @FXML
-    private ProgressBar dataLoad;
-
-    private void fillProgress()
-    {
-        int i = 0;
-        try {
-            while (i <= 100) {
-                // fill the menu bar
-                dataLoad.setProgress(i);
-
-                // delay the thread
-                Thread.sleep(100);
-                i += 20;
-            }
-        }
-        catch (Exception e) {
-        }
-    }
-
-    @FXML
     void login(ActionEvent event) {
         try {
             System.out.println("Keep auth? " + keepAuth.isSelected());
@@ -70,9 +51,14 @@ public class AuthController {
             if (user.getMotDePasse().equals(passwordField.getText())) {
                 System.out.println("Login OK");
                 loginButton.setDisable(true);
-                dataLoad.setVisible(true);
-                fillProgress();
-                switchScene(CalendarScene,"Dashboard");
+                Thread.sleep(100);
+                if (user.getType().equals("Etudiant")) {
+                    Parent root = CalendarLoader.load();
+                    DashboardController controller = CalendarLoader.getController();
+
+                    controller.setUserId(user.getId());
+                    switchScene(root, "Calendrier Etudiant");
+                }
             } else {
                 System.out.println("Wrong password");
             }

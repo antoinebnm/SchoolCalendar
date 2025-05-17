@@ -3,11 +3,8 @@
 }
 
 #submitButton {
-    -fx-padding: 0.5rem 1rem;
-
     -fx-cursor: pointer;
 
     -fx-border-style: none;
-    -fx-border-radius: 0.3125rem;
     -fx-background-color: #d3a040;
 }

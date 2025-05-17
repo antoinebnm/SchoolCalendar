@@ -28,9 +28,18 @@ public class DatabaseManager {
                 }
             }
 
-            System.out.println("✅ Base de données initialisée !");
+            System.out.println("Base de données initialisée !");
         } catch (Exception e) {
-            System.err.println("❌ Erreur d'initialisation de la base de données : " + e.getMessage());
+            System.err.println("Erreur d'initialisation de la base de données : " + e.getMessage());
+        }
+    }
+
+    public static boolean testConnection() {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            return conn != null && !conn.isClosed();
+        } catch (SQLException e) {
+            System.err.println("Database connection failed: " + e.getMessage());
+            return false;
         }
     }
 

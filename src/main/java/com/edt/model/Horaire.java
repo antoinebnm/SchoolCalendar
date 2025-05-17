@@ -13,29 +13,13 @@ public class Horaire {
         this.duree = duree;
     }
 
-    public LocalDateTime getDateDebut() {
-        return dateDebut;
-    }
+    public LocalDateTime getDateDebut() { return dateDebut; }
+    public int getDuree() { return duree; }
+    public LocalDateTime getDateFin() { return dateDebut.plusMinutes(duree); }
 
-    public void setDateDebut(LocalDateTime dateDebut) {
-        this.dateDebut = dateDebut;
-    }
-
-    public int getDuree() {
-        return duree;
-    }
-
-    public void setDuree(int duree) {
-        this.duree = duree;
-    }
-
-    public LocalDateTime getDateFin() {
-        return dateDebut.plusMinutes(duree);
-    }
-
-    public Duration getDureeAsDuration() {
-        return Duration.ofMinutes(duree);
-    }
+    public void setDateDebut(LocalDateTime dateDebut) { this.dateDebut = dateDebut; }
+    public void setDuree(int duree) { this.duree = duree; }
+    public Duration getDureeAsDuration() { return Duration.ofMinutes(duree); }
 
     @Override
     public String toString() {
